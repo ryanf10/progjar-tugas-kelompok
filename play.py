@@ -23,6 +23,7 @@ class ClientInterface:
         logging.warning(f"connecting to {self.server_address}")
         try:
             logging.warning(f"sending message ")
+            command_str += "\r\n\r\n"
             sock.sendall(command_str.encode())
             # Look for the response, waiting until socket is done (no more data)
             data_received="" #empty string

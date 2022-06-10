@@ -9,8 +9,8 @@ ATURAN PROTOKOL:
 
 REQUEST YANG DILAYANI:
 - informasi umum:
-  * Jika request tidak dikenali akan menghasilkan pesan
+    * Jika request tidak dikenali akan menghasilkan pesan
     - status: ERROR
     - data: request tidak dikenali
-  * Semua result akan diberikan dalam bentuk JSON dan diakhiri
-    dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
+  * Semua request yang dikirim oleh client diakhiri dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
+  * Semua result akan diberikan dalam bentuk JSON dan diakhiri dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
