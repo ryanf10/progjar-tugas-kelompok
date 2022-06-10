@@ -5,18 +5,19 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
 from kivy.graphics import Color, Rectangle, Line
 from functools import partial
-from kivy.clock import  Clock
+from kivy.clock import Clock
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 import socket
 import logging
 import json
 
 class ClientInterface:
-    def __init__(self,idplayer='1'):
-        self.idplayer=idplayer
-        self.server_address=('0.0.0.0',6666)
+    def __init__(self, idplayer='1'):
+        self.idplayer = idplayer
+        self.server_address = ('0.0.0.0', 6666)
 
-    def send_command(self,command_str=""):
+    def send_command(self, command_str=""):
         global server_address
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.connect(self.server_address)
@@ -26,9 +27,9 @@ class ClientInterface:
             command_str += "\r\n\r\n"
             sock.sendall(command_str.encode())
             # Look for the response, waiting until socket is done (no more data)
-            data_received="" #empty string
+            data_received = "" # empty string
             while True:
-                #socket does not receive all data at once, data comes in part, need to be concatenated at the end of process
+                # socket does not receive all data at once, data comes in part, need to be concatenated at the end of process
                 data = sock.recv(16)
                 if data:
                     #data is not empty, concat with previous content
@@ -49,7 +50,7 @@ class ClientInterface:
 
     def set_location(self,x=100,y=100):
         player = self.idplayer
-        command_str=f"set_location {player} {x} {y}"
+        command_str = f"set_location {player} {x} {y}"
         hasil = self.send_command(command_str)
         if (hasil['status']=='OK'):
             return True
@@ -120,10 +121,10 @@ class Player:
 
     def inisialiasi(self):
         wid = self.widget
-        btn_left = Button(text='left',on_press=partial(self.move, wid, 'left'))
-        btn_up = Button(text='up',on_press=partial(self.move, wid, 'up'))
-        btn_down = Button(text='down',on_press=partial(self.move, wid, 'down'))
-        btn_right = Button(text='right',on_press=partial(self.move, wid, 'right'))
+        btn_left = Button(text='left', on_press=partial(self.move, wid, 'left'))
+        btn_up = Button(text='up', on_press=partial(self.move, wid, 'up'))
+        btn_down = Button(text='down', on_press=partial(self.move, wid, 'down'))
+        btn_right = Button(text='right', on_press=partial(self.move, wid, 'right'))
 
         self.buttons = BoxLayout(size_hint=(1, None), height=50)
         self.buttons.add_widget(btn_left)
@@ -132,48 +133,79 @@ class Player:
         self.buttons.add_widget(btn_right)
 
 
+class MyScreenManager(ScreenManager):
+    def __init__(self, **kwargs):
+        super(MyScreenManager, self).__init__(**kwargs)
+        self.menu_screen = MenuScreen(self, 'menu_screen')
+        self.add_widget(self.menu_screen)
 
-class MyApp(App):
+
+class MenuScreen(Screen):
+    def __init__(self, sm, name):
+        super(MenuScreen, self).__init__(name=name)
+        self.sm = sm
+        box = BoxLayout(size_hint=(1, None), height=200)
+        box.add_widget(Button(text='Spawn', on_press=self.change_screen))
+        self.add_widget(box)
+
+    def change_screen(self, *kwargs):
+        self.sm.play_screen = None
+        self.sm.play_screen = PlayScreen(self.sm, 'play_screen')
+        self.sm.add_widget(self.sm.play_screen)
+        self.sm.current = 'play_screen'
+        self.sm.play_screen.play()
+
+
+class PlayScreen(Screen):
     players = []
-    def refresh(self,callback):
+
+    def __init__(self, sm, name):
+        super(PlayScreen, self).__init__(name=name)
+        self.sm = sm
+
+    def refresh(self, root, callback):
         for i in self.players:
             i.get_widget().canvas.clear()
             i.draw()
 
-    def build(self):
-
-        p1 = Player('1',1,0,0)
-        p1.set_xy(100,100)
+    def play(self):
+        p1 = Player('1', 1, 0, 0)
+        p1.set_xy(100, 100)
         widget1 = p1.get_widget()
         buttons1 = p1.get_buttons()
         self.players.append(p1)
 
-
-        p2 = Player('2',0,1,0)
-        p2.set_xy(100,200)
+        p2 = Player('2', 0, 1, 0)
+        p2.set_xy(100, 200)
         widget2 = p2.get_widget()
         buttons2 = p2.get_buttons()
         self.players.append(p2)
 
-        p3 = Player('3',0,0,1)
-        p3.set_xy(150,150)
+        p3 = Player('3', 0, 0, 1)
+        p3.set_xy(150, 150)
         widget3 = p3.get_widget()
         buttons3 = p3.get_buttons()
         self.players.append(p3)
 
-
         root = BoxLayout(orientation='horizontal')
         root.add_widget(widget1)
         root.add_widget(buttons1)
-        root.add_widget(widget2)
-        root.add_widget(buttons2)
         root.add_widget(widget3)
         root.add_widget(buttons3)
 
+        self.add_widget(root)
 
-        Clock.schedule_interval(self.refresh,1/60)
+        Clock.schedule_interval(partial(self.refresh, root), 1 / 60)
 
-        return root
+
+class MyApp(App):
+    def __init__(self):
+        super(MyApp, self).__init__()
+        self.sm = MyScreenManager()
+
+    def build(self):
+        return self.sm
+
 
 if __name__ == '__main__':
     MyApp().run()
