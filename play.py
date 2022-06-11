@@ -80,6 +80,12 @@ class ClientInterface:
         hasil = self.send_command(command_str)
         return hasil
 
+    def check_existence(self):
+        player = self.idplayer
+        command_str = f"check_existence {player}"
+        hasil = self.send_command(command_str)
+        return hasil
+
 
 class Player:
     def __init__(self, idplayer='1', r=1, g=0, b=0, size=50):
@@ -143,6 +149,9 @@ class Player:
 
     def check_collision(self):
         return self.client_interface.check_collision()
+
+    def check_existence(self):
+        return self.client_interface.check_existence()
 
     def inisialiasi(self):
         wid = self.widget
@@ -224,6 +233,10 @@ class PlayScreen(Screen):
 
         cek_collision = player.check_collision()
         if player is not None:
+            cek = player.check_existence()
+            if cek['status'] == 'GAMEOVER':
+                isPlaying = False
+
             if cek_collision['status'] == 'GAMEOVER':
                 isPlaying = False
 
@@ -276,8 +289,8 @@ class PlayScreen(Screen):
 
     def new_player(self, r, g, b):
         p = Player(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) + str(len(self.players) + 1), r,
-                g, b, 80)
-        x = 300
+                g, b, 200)
+        x = 500
         y = 100
         p.set_xy(x, y)
         p.client_interface.set_information(r, g, b, x, y, p.size)

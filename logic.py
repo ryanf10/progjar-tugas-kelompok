@@ -85,6 +85,16 @@ class PlayerServerInterface:
         except Exception as ee:
             return dict(status='ERROR')
 
+    def check_existence(self, params=[]):
+        pnum = params[0]
+        try:
+            if pnum in list(self.players.keys()):
+                return dict(status='OK')
+            else:
+                return dict(status='GAMEOVER')
+        except Exception as ee:
+            return dict(status='ERROR')
+
 
 if __name__ == '__main__':
     p = PlayerServerInterface()

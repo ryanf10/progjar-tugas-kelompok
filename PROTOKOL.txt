@@ -77,3 +77,18 @@ CHECK_COLLISION:
 - STILL ALIVE:
   - status: OK
   - info: data player dalam format string yang dipisahkan dengan koma dengan urutan r,g,b,x,y,size
+  - GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
+
+CHECK_EXISTENCE:
+* TUJUAN: untuk memastikan player masih hidup (tidak termakan oleh player lain)
+* PARAMETER: id player yang dicek
+* RESULT:
+- GAMEOVER (ketika player telah termakan oleh player lain):
+  - status: GAMEOVER
+- STILL ALIVE:
+  - status: OK
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
