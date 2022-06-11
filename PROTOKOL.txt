@@ -14,3 +14,14 @@ REQUEST YANG DILAYANI:
     - data: request tidak dikenali
   * Semua request yang dikirim oleh client diakhiri dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
   * Semua result akan diberikan dalam bentuk JSON dan diakhiri dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
+
+GET_KEYS:
+* TUJUAN: untuk mendapatkan daftar idplayer
+* PARAMETER: tidak ada
+* RESULT:
+- BERHASIL:
+  - status: OK
+  - keys: list key yang merupakan idplayer
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan

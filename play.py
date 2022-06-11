@@ -156,42 +156,50 @@ class MenuScreen(Screen):
         self.sm.play_screen.play()
 
 
-class PlayScreen(Screen):
-    players = []
+player = None
 
+
+class PlayScreen(Screen):
     def __init__(self, sm, name):
         super(PlayScreen, self).__init__(name=name)
         self.sm = sm
+        self.players = []
+        self.player_keys = []
+        self.cli = ClientInterface()
+
+        self.get_other_player()
+
+        global player
+        player = self.new_player(1, 0, 0)
+
+    def get_other_player(self):
+        hasil = self.cli.send_command("get_keys")
+        for key in hasil['keys']:
+            p = Player(key, 1.0, 0.0, 0.0)
+            self.player_keys.append(key)
+            self.players.append(p)
 
     def refresh(self, root, callback):
         for i in self.players:
             i.get_widget().canvas.clear()
             i.draw()
 
+    def new_player(self, r, g, b):
+        p = Player(str(len(self.players) + 1), r, g, b)
+        p.set_xy(300, 100)
+        p.client_interface.set_location(300, 100)
+        self.players.append(p)
+        self.player_keys.append(p.idplayer)
+        return p
+
     def play(self):
-        p1 = Player('1', 1, 0, 0)
-        p1.set_xy(100, 100)
-        widget1 = p1.get_widget()
-        buttons1 = p1.get_buttons()
-        self.players.append(p1)
-
-        p2 = Player('2', 0, 1, 0)
-        p2.set_xy(100, 200)
-        widget2 = p2.get_widget()
-        buttons2 = p2.get_buttons()
-        self.players.append(p2)
-
-        p3 = Player('3', 0, 0, 1)
-        p3.set_xy(150, 150)
-        widget3 = p3.get_widget()
-        buttons3 = p3.get_buttons()
-        self.players.append(p3)
-
         root = BoxLayout(orientation='horizontal')
-        root.add_widget(widget1)
-        root.add_widget(buttons1)
-        root.add_widget(widget3)
-        root.add_widget(buttons3)
+
+        for i in self.players:
+            root.add_widget(i.get_widget())
+
+        global player
+        self.add_widget(player.get_buttons())
 
         self.add_widget(root)
 
