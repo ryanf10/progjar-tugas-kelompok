@@ -4,6 +4,7 @@ import base64
 from glob import glob
 import shelve
 
+VERSION = '0.1'
 
 # asumsi, hanya ada player 1, 2 , 3
 class PlayerServerInterface:

@@ -8,12 +8,15 @@ from functools import partial
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.core.window import Window
+from kivy.uix.label import Label
 
 import socket
 import logging
 import json
 import random
 import string
+
+VERSION = '0.1'
 
 
 class ClientInterface:
@@ -157,16 +160,24 @@ class MenuScreen(Screen):
     def __init__(self, sm, name):
         super(MenuScreen, self).__init__(name=name)
         self.sm = sm
+        self.cli = ClientInterface()
         box = BoxLayout(size_hint=(1, None), height=200)
         box.add_widget(Button(text='Spawn', on_press=self.change_screen))
         self.add_widget(box)
 
     def change_screen(self, *kwargs):
-        self.sm.play_screen = None
-        self.sm.play_screen = PlayScreen(self.sm, 'play_screen')
-        self.sm.add_widget(self.sm.play_screen)
-        self.sm.current = 'play_screen'
-        self.sm.play_screen.play()
+        global VERSION
+
+        hasil = self.cli.send_command(f"get_version")
+        if hasil['status'] == 'OK' and hasil['version'] == VERSION:
+            self.sm.play_screen = None
+            self.sm.play_screen = PlayScreen(self.sm, 'play_screen')
+            self.sm.add_widget(self.sm.play_screen)
+            self.sm.current = 'play_screen'
+            self.sm.play_screen.play()
+        else:
+            label = Label(text='Please update your client')
+            self.sm.menu_screen.add_widget(label)
 
 
 player = None

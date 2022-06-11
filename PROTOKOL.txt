@@ -56,3 +56,10 @@ GET_INFORMATION:
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
+GET_VERSION:
+* TUJUAN: untuk mengetahui versi protocol
+* PARAMETER: -
+* RESULT:
+- BERHASIL:
+  - status: OK
+  - version: versi protokol
