@@ -7,15 +7,17 @@ from kivy.graphics import Color, Rectangle, Line
 from functools import partial
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.core.window import Window
 
 import socket
 import logging
 import json
 
+
 class ClientInterface:
     def __init__(self, idplayer='1'):
         self.idplayer = idplayer
-        self.server_address = ('0.0.0.0', 6666)
+        self.server_address = ('192.168.5.10', 6666)
 
     def send_command(self, command_str=""):
         global server_address
@@ -27,12 +29,12 @@ class ClientInterface:
             command_str += "\r\n\r\n"
             sock.sendall(command_str.encode())
             # Look for the response, waiting until socket is done (no more data)
-            data_received = "" # empty string
+            data_received = ""  # empty string
             while True:
                 # socket does not receive all data at once, data comes in part, need to be concatenated at the end of process
                 data = sock.recv(16)
                 if data:
-                    #data is not empty, concat with previous content
+                    # data is not empty, concat with previous content
                     data_received += data.decode()
                     if "\r\n\r\n" in data_received:
                         break
@@ -48,28 +50,28 @@ class ClientInterface:
             logging.warning("error during data receiving")
             return False
 
-    def set_location(self,x=100,y=100):
+    def set_location(self, x=100, y=100):
         player = self.idplayer
         command_str = f"set_location {player} {x} {y}"
         hasil = self.send_command(command_str)
-        if (hasil['status']=='OK'):
+        if (hasil['status'] == 'OK'):
             return True
         else:
             return False
 
     def get_location(self):
         player = self.idplayer
-        command_str=f"get_location {player}"
+        command_str = f"get_location {player}"
         hasil = self.send_command(command_str)
-        if (hasil['status']=='OK'):
+        if (hasil['status'] == 'OK'):
             lokasi = hasil['location'].split(',')
-            return (int(lokasi[0]),int(lokasi[1]))
+            return (int(lokasi[0]), int(lokasi[1]))
         else:
             return False
 
 
 class Player:
-    def __init__(self,idplayer='1',r=1,g=0,b=0):
+    def __init__(self, idplayer='1', r=1, g=0, b=0):
         self.current_x = 100
         self.current_y = 100
         self.warna_r = r
@@ -80,44 +82,51 @@ class Player:
         self.buttons = None
         self.client_interface = ClientInterface(self.idplayer)
         self.inisialiasi()
-        #self.draw(self.widget,self.warna_r,self.warna_g,self.warna_b)
+        # self.draw(self.widget,self.warna_r,self.warna_g,self.warna_b)
+
     def get_client_interface(self):
         return self.client_interface
+
     def get_idplayer(self):
         return self.idplayer
-    def set_xy(self,x=100,y=100):
+
+    def set_xy(self, x=100, y=100):
         self.current_x = x
         self.current_y = y
-        #self.draw(self.widget, self.warna_r, self.warna_g, self.warna_b)
+        # self.draw(self.widget, self.warna_r, self.warna_g, self.warna_b)
 
     def get_widget(self):
         return self.widget
+
     def get_buttons(self):
         return self.buttons
 
     def draw(self):
-        self.current_x, self.current_y = self.client_interface.get_location()
-        wid = self.widget
-        r = self.warna_r
-        g = self.warna_g
-        b = self.warna_b
+        hasil = self.client_interface.get_location()
 
-        with wid.canvas:
-            Color(r,g,b)
-            Line(rectangle=(self.current_x,self.current_y, 200, 200))
+        if hasil:
+            self.current_x, self.current_y = hasil
+            wid = self.widget
+            r = self.warna_r
+            g = self.warna_g
+            b = self.warna_b
 
-    def move(self,wid, arah,*kwargs):
-        #self.draw(wid,0,0,0)
-        if (arah=='right'):
+            with wid.canvas:
+                Color(r, g, b)
+                Line(rectangle=(self.current_x, self.current_y, 200, 200))
+
+    def move(self, wid, arah, *kwargs):
+        # self.draw(wid,0,0,0)
+        if (arah == 'right'):
             self.current_x = self.current_x + 5
-        if (arah=='left'):
+        if (arah == 'left'):
             self.current_x = self.current_x - 5
-        if (arah=='up'):
+        if (arah == 'up'):
             self.current_y = self.current_y + 5
-        if (arah=='down'):
+        if (arah == 'down'):
             self.current_y = self.current_y - 5
-        self.client_interface.set_location(self.current_x,self.current_y)
-        #self.draw(wid,self.warna_r,self.warna_g,self.warna_b)
+        self.client_interface.set_location(self.current_x, self.current_y)
+        # self.draw(wid,self.warna_r,self.warna_g,self.warna_b)
 
     def inisialiasi(self):
         wid = self.widget
@@ -157,6 +166,7 @@ class MenuScreen(Screen):
 
 
 player = None
+isPlaying = False
 
 
 class PlayScreen(Screen):
@@ -170,19 +180,47 @@ class PlayScreen(Screen):
         self.get_other_player()
 
         global player
-        player = self.new_player(1, 0, 0)
+        player = self.new_player(0, 1, 0)
+
+        global isPlaying
+        isPlaying = True
 
     def get_other_player(self):
         hasil = self.cli.send_command("get_keys")
         for key in hasil['keys']:
-            p = Player(key, 1.0, 0.0, 0.0)
+            p = Player(key, 1, 0, 0)
             self.player_keys.append(key)
             self.players.append(p)
 
     def refresh(self, root, callback):
-        for i in self.players:
-            i.get_widget().canvas.clear()
-            i.draw()
+        global player
+        global isPlaying
+
+        if isPlaying:
+            hasil = self.cli.send_command("get_keys")
+            new_other_player = [key for key in hasil['keys'] if key not in self.player_keys]
+            removed_player = [key for key in self.player_keys if key not in hasil['keys']]
+            index_remove = []
+            for key in removed_player:
+                for i in range(0, len(self.player_keys)):
+                    if self.player_keys[i] == key:
+                        index_remove.append(i)
+            print(index_remove)
+            for i in index_remove:
+                if i < len(self.player_keys):
+                    self.players[i].get_widget().canvas.clear()
+                    self.player_keys.pop(i)
+                    self.players.pop(i)
+
+            for key in new_other_player:
+                p = Player(key, 1, 0, 0)
+                self.player_keys.append(key)
+                self.players.append(p)
+                root.add_widget(p.get_widget())
+
+            for i in self.players:
+                i.get_widget().canvas.clear()
+                i.draw()
 
     def new_player(self, r, g, b):
         p = Player(str(len(self.players) + 1), r, g, b)
@@ -210,10 +248,21 @@ class MyApp(App):
     def __init__(self):
         super(MyApp, self).__init__()
         self.sm = MyScreenManager()
+        self.cli = ClientInterface()
+
+    def on_request_close(self, *kwargs):
+        if self.sm.current == "play_screen":
+            self.cli.send_command(f'remove {player.idplayer}')
 
     def build(self):
+        print('masuk')
+        Window.bind(on_request_close=self.on_request_close)
         return self.sm
 
 
 if __name__ == '__main__':
-    MyApp().run()
+    try:
+        app = MyApp()
+        app.run()
+    except KeyboardInterrupt:
+        app.on_request_close()

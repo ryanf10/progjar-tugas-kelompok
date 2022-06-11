@@ -34,6 +34,13 @@ class PlayerServerInterface:
         except Exception as e:
             return dict(status='ERROR')
 
+    def remove(self, params=[]):
+        try:
+            self.players.pop(params[0])
+            return dict(status='OK')
+        except Exception as e:
+            return dict(status='ERROR')
+
 
 if __name__ == '__main__':
     p = PlayerServerInterface()

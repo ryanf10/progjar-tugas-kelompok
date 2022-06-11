@@ -9,7 +9,7 @@ ATURAN PROTOKOL:
 
 REQUEST YANG DILAYANI:
 - informasi umum:
-    * Jika request tidak dikenali akan menghasilkan pesan
+  * Jika request tidak dikenali akan menghasilkan pesan
     - status: ERROR
     - data: request tidak dikenali
   * Semua request yang dikirim oleh client diakhiri dengan character ascii code #13#10#13#10 atau "\r\n\r\n"
@@ -22,6 +22,16 @@ GET_KEYS:
 - BERHASIL:
   - status: OK
   - keys: list key yang merupakan idplayer
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
+
+REMOVE:
+* TUJUAN: untuk menghapus data player yang meninggalkan permainan
+* PARAMETER: id player
+* RESULT:
+- BERHASIL:
+  - status: OK
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
