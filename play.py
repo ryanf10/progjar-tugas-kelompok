@@ -3,7 +3,7 @@ from kivy.uix.widget import Widget
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
 from kivy.app import App
-from kivy.graphics import Color, Rectangle, Line
+from kivy.graphics import Color, Rectangle, Line, Ellipse
 from functools import partial
 from kivy.clock import Clock
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -12,6 +12,8 @@ from kivy.core.window import Window
 import socket
 import logging
 import json
+import random
+import string
 
 
 class ClientInterface:
@@ -114,7 +116,7 @@ class Player:
 
             with wid.canvas:
                 Color(r, g, b)
-                Line(rectangle=(self.current_x, self.current_y, 200, 200))
+                Ellipse(pos=(self.current_x, self.current_y), size=(self.size, self.size))
 
     def move(self, wid, arah, *kwargs):
         # self.draw(wid,0,0,0)
@@ -182,7 +184,7 @@ class PlayScreen(Screen):
         self.get_other_player()
 
         global player
-        player = self.new_player(0, 1, 0)
+        player = self.new_player(random.random(), random.random(), random.random())
 
         global isPlaying
         isPlaying = True
@@ -225,7 +227,8 @@ class PlayScreen(Screen):
                 i.draw()
 
     def new_player(self, r, g, b):
-        p = Player(str(len(self.players) + 1), r, g, b)
+        p = Player(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) + str(len(self.players) + 1), r,
+                   g, b, 50)
         p.set_xy(300, 100)
         p.client_interface.set_information(r, g, b, 300, 100, p.size)
         self.players.append(p)
