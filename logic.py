@@ -10,21 +10,25 @@ class PlayerServerInterface:
     def __init__(self):
         self.players = shelve.open('g.db', writeback=True)
 
-    def set_location(self, params=[]):
+    def set_information(self, params=[]):
         pnum = params[0]
-        x = params[1]
-        y = params[2]
+        r = params[1]
+        g = params[2]
+        b = params[3]
+        x = params[4]
+        y = params[5]
+        size = params[6]
         try:
-            self.players[pnum] = f"{x},{y}"
+            self.players[pnum] = f"{r},{g},{b},{x},{y},{size}"
             self.players.sync()
-            return dict(status='OK', player=pnum)
+            return dict(status='OK')
         except Exception as e:
             return dict(status='ERROR')
 
-    def get_location(self, params=[]):
+    def get_information(self, params=[]):
         pnum = params[0]
         try:
-            return dict(status='OK', location=self.players[pnum])
+            return dict(status='OK', info=self.players[pnum])
         except Exception as ee:
             return dict(status='ERROR')
 
@@ -44,7 +48,7 @@ class PlayerServerInterface:
 
 if __name__ == '__main__':
     p = PlayerServerInterface()
-    p.set_location(['1', 100, 100])
-    print(p.get_location('1'))
-    p.set_location(['2', 120, 100])
-    print(p.get_location('2'))
+    # p.set_location(['1', 100, 100])
+    # print(p.get_location('1'))
+    # p.set_location(['2', 120, 100])
+    # print(p.get_location('2'))

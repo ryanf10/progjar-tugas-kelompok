@@ -17,7 +17,7 @@ import json
 class ClientInterface:
     def __init__(self, idplayer='1'):
         self.idplayer = idplayer
-        self.server_address = ('192.168.5.10', 6666)
+        self.server_address = ('0.0.0.0', 6666)
 
     def send_command(self, command_str=""):
         global server_address
@@ -50,33 +50,34 @@ class ClientInterface:
             logging.warning("error during data receiving")
             return False
 
-    def set_location(self, x=100, y=100):
+    def set_information(self, r=1, g=0, b=0, x=100, y=100, size=50):
         player = self.idplayer
-        command_str = f"set_location {player} {x} {y}"
+        command_str = f"set_information {player} {r} {g} {b} {x} {y} {size}"
         hasil = self.send_command(command_str)
         if (hasil['status'] == 'OK'):
             return True
         else:
             return False
 
-    def get_location(self):
+    def get_information(self):
         player = self.idplayer
-        command_str = f"get_location {player}"
+        command_str = f"get_information {player}"
         hasil = self.send_command(command_str)
         if (hasil['status'] == 'OK'):
-            lokasi = hasil['location'].split(',')
-            return (int(lokasi[0]), int(lokasi[1]))
+            info = hasil['info'].split(',')
+            return (float(info[0]), float(info[1]), float(info[2]), int(info[3]), int(info[4]), int(info[5]))
         else:
             return False
 
 
 class Player:
-    def __init__(self, idplayer='1', r=1, g=0, b=0):
+    def __init__(self, idplayer='1', r=1, g=0, b=0, size=50):
         self.current_x = 100
         self.current_y = 100
         self.warna_r = r
         self.warna_g = g
         self.warna_b = b
+        self.size = size
         self.idplayer = idplayer
         self.widget = Widget()
         self.buttons = None
@@ -102,10 +103,10 @@ class Player:
         return self.buttons
 
     def draw(self):
-        hasil = self.client_interface.get_location()
+        hasil = self.client_interface.get_information()
 
         if hasil:
-            self.current_x, self.current_y = hasil
+            self.warna_r, self.warna_g, self.warna_b, self.current_x, self.current_y, self.size = hasil
             wid = self.widget
             r = self.warna_r
             g = self.warna_g
@@ -125,8 +126,9 @@ class Player:
             self.current_y = self.current_y + 5
         if (arah == 'down'):
             self.current_y = self.current_y - 5
-        self.client_interface.set_location(self.current_x, self.current_y)
-        # self.draw(wid,self.warna_r,self.warna_g,self.warna_b)
+
+        self.client_interface.set_information(self.warna_r, self.warna_g, self.warna_b, self.current_x, self.current_y,
+                                              self.size)
 
     def inisialiasi(self):
         wid = self.widget
@@ -205,7 +207,7 @@ class PlayScreen(Screen):
                 for i in range(0, len(self.player_keys)):
                     if self.player_keys[i] == key:
                         index_remove.append(i)
-            print(index_remove)
+
             for i in index_remove:
                 if i < len(self.player_keys):
                     self.players[i].get_widget().canvas.clear()
@@ -225,7 +227,7 @@ class PlayScreen(Screen):
     def new_player(self, r, g, b):
         p = Player(str(len(self.players) + 1), r, g, b)
         p.set_xy(300, 100)
-        p.client_interface.set_location(300, 100)
+        p.client_interface.set_information(r, g, b, 300, 100, p.size)
         self.players.append(p)
         self.player_keys.append(p.idplayer)
         return p
@@ -255,7 +257,6 @@ class MyApp(App):
             self.cli.send_command(f'remove {player.idplayer}')
 
     def build(self):
-        print('masuk')
         Window.bind(on_request_close=self.on_request_close)
         return self.sm
 

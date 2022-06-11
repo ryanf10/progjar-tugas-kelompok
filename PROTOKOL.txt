@@ -35,3 +35,24 @@ REMOVE:
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
+
+SET_INFORMATION:
+* TUJUAN: untuk menyimpan informasi player (r,g,b,x,y,size)
+* PARAMETER: id player, r, g, b, x, y, size
+* RESULT:
+- BERHASIL:
+  - status: OK
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
+
+GET_INFORMATION:
+* TUJUAN: untuk mengambil informasi player (r,g,b,x,y,size)
+* PARAMETER: id player
+* RESULT:
+- BERHASIL:
+  - status: OK
+  - info: data player dalam format string yang dipisahkan dengan koma dengan urutan r,g,b,x,y,size
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
