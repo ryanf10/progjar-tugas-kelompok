@@ -74,6 +74,12 @@ class ClientInterface:
         else:
             return False
 
+    def check_collision(self):
+        player = self.idplayer
+        command_str = f"check_collision {player}"
+        hasil = self.send_command(command_str)
+        return hasil
+
 
 class Player:
     def __init__(self, idplayer='1', r=1, g=0, b=0, size=50):
@@ -133,7 +139,10 @@ class Player:
             self.current_y = self.current_y - 5
 
         self.client_interface.set_information(self.warna_r, self.warna_g, self.warna_b, self.current_x, self.current_y,
-                                              self.size)
+                                            self.size)
+
+    def check_collision(self):
+        return self.client_interface.check_collision()
 
     def inisialiasi(self):
         wid = self.widget
@@ -194,6 +203,8 @@ class PlayScreen(Screen):
 
         self.get_other_player()
 
+        self.event_refresh = None
+
         global player
         player = self.new_player(random.random(), random.random(), random.random())
 
@@ -210,6 +221,15 @@ class PlayScreen(Screen):
     def refresh(self, root, callback):
         global player
         global isPlaying
+
+        cek_collision = player.check_collision()
+        if player is not None:
+            if cek_collision['status'] == 'GAMEOVER':
+                isPlaying = False
+
+            elif cek_collision['status'] == 'OK':
+                info = cek_collision['info'].split(',')
+                player.size = info[5]
 
         if isPlaying:
             hasil = self.cli.send_command("get_keys")
@@ -236,12 +256,31 @@ class PlayScreen(Screen):
             for i in self.players:
                 i.get_widget().canvas.clear()
                 i.draw()
+        else:
+            self.game_over()
+
+    def game_over(self):
+        global player
+
+        for i in self.players:
+            i.get_widget().canvas.clear()
+
+        player = None
+        self.players = []
+        self.player_keys = []
+        self.sm.remove_widget(self.sm.play_screen)
+        self.sm.current = 'menu_screen'
+
+        if self.event_refresh:
+            self.event_refresh.cancel()
 
     def new_player(self, r, g, b):
         p = Player(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) + str(len(self.players) + 1), r,
-                   g, b, 50)
-        p.set_xy(300, 100)
-        p.client_interface.set_information(r, g, b, 300, 100, p.size)
+                g, b, 80)
+        x = 300
+        y = 100
+        p.set_xy(x, y)
+        p.client_interface.set_information(r, g, b, x, y, p.size)
         self.players.append(p)
         self.player_keys.append(p.idplayer)
         return p
@@ -257,7 +296,7 @@ class PlayScreen(Screen):
 
         self.add_widget(root)
 
-        Clock.schedule_interval(partial(self.refresh, root), 1 / 60)
+        self.event_refresh = Clock.schedule_interval(partial(self.refresh, root), 1 / 60)
 
 
 class MyApp(App):

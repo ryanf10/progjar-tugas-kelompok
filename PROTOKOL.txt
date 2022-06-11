@@ -56,10 +56,24 @@ GET_INFORMATION:
 - GAGAL:
   - status: ERROR
   - data: pesan kesalahan
+
 GET_VERSION:
 * TUJUAN: untuk mengetahui versi protocol
 * PARAMETER: -
 * RESULT:
-- BERHASIL:
+  - BERHASIL:
+    - status: OK
+    - version: versi protokol
+  - GAGAL:
+    - status: ERROR
+    - data: pesan kesalahan
+
+CHECK_COLLISION:
+* TUJUAN: untuk mengetahui adanya collision antar player
+* PARAMETER: id player yang dicek
+* RESULT:
+- GAMEOVER (ketika player mengalami collision dengan player yang berukuran lebih besar):
+  - status: GAMEOVER
+- STILL ALIVE:
   - status: OK
-  - version: versi protokol
+  - info: data player dalam format string yang dipisahkan dengan koma dengan urutan r,g,b,x,y,size
