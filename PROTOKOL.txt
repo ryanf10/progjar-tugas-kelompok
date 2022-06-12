@@ -61,12 +61,12 @@ GET_VERSION:
 * TUJUAN: untuk mengetahui versi protocol
 * PARAMETER: -
 * RESULT:
-  - BERHASIL:
-    - status: OK
-    - version: versi protokol
-  - GAGAL:
-    - status: ERROR
-    - data: pesan kesalahan
+- BERHASIL:
+  - status: OK
+  - version: versi protokol
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
 
 CHECK_COLLISION:
 * TUJUAN: untuk mengetahui adanya collision antar player
@@ -77,7 +77,7 @@ CHECK_COLLISION:
 - STILL ALIVE:
   - status: OK
   - info: data player dalam format string yang dipisahkan dengan koma dengan urutan r,g,b,x,y,size
-  - GAGAL:
+- GAGAL:
   - status: ERROR
   - data: pesan kesalahan
 
@@ -88,6 +88,16 @@ CHECK_EXISTENCE:
 - GAMEOVER (ketika player telah termakan oleh player lain):
   - status: GAMEOVER
 - STILL ALIVE:
+  - status: OK
+- GAGAL:
+  - status: ERROR
+  - data: pesan kesalahan
+
+SPAWN_FOOD:
+* TUJUAN: generate makanan player
+* PARAMETER: -
+* RESULT:
+- BERHASIL
   - status: OK
 - GAGAL:
   - status: ERROR

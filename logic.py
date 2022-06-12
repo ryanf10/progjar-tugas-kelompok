@@ -3,6 +3,8 @@ import json
 import base64
 from glob import glob
 import shelve
+import string
+import random
 
 VERSION = '0.1'
 
@@ -74,7 +76,7 @@ class PlayerServerInterface:
                             player_size + player_y > other_player_y
                     ):
                         if player_size < other_player_size:
-                            return dict(status='GAMEOVER')
+                            return dict(status='GAMEOVER', size=f"{other_player_size}")
                         elif player_size > other_player_size:
                             player_size = player_size + other_player_size
                             self.players.pop(key)
@@ -92,6 +94,27 @@ class PlayerServerInterface:
                 return dict(status='OK')
             else:
                 return dict(status='GAMEOVER')
+        except Exception as ee:
+            return dict(status='ERROR')
+
+    def spawn_food(self, params=[]):
+        try:
+            keys = list(self.players.keys())
+            jumlah_food = 0
+            maksimum_food = 20
+            for key in keys:
+                info = self.players[key].split(',')
+                if info[5] == '5':
+                    jumlah_food += 1
+
+            for i in range(0, maksimum_food - jumlah_food):
+                id = ''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) + str(len(keys) + i + 1)
+                x = random.randrange(0, 1000, 5)
+                y = random.randrange(100, 1000, 5)
+                self.players[id] = f"1.0,1.0,1.0,{x},{y},5"
+                self.players.sync()
+
+            return dict(status='OK')
         except Exception as ee:
             return dict(status='ERROR')
 

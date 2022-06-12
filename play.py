@@ -209,7 +209,7 @@ class PlayScreen(Screen):
         self.players = []
         self.player_keys = []
         self.cli = ClientInterface()
-
+        self.spawn_food()
         self.get_other_player()
 
         self.event_refresh = None
@@ -220,8 +220,12 @@ class PlayScreen(Screen):
         global isPlaying
         isPlaying = True
 
+    def spawn_food(self):
+        hasil = self.cli.send_command("spawn_food")
+
     def get_other_player(self):
         hasil = self.cli.send_command("get_keys")
+
         for key in hasil['keys']:
             p = Player(key, 1, 0, 0)
             self.player_keys.append(key)
@@ -231,12 +235,12 @@ class PlayScreen(Screen):
         global player
         global isPlaying
 
-        cek_collision = player.check_collision()
         if player is not None:
             cek = player.check_existence()
             if cek['status'] == 'GAMEOVER':
                 isPlaying = False
 
+            cek_collision = player.check_collision()
             if cek_collision['status'] == 'GAMEOVER':
                 isPlaying = False
 
@@ -289,8 +293,8 @@ class PlayScreen(Screen):
 
     def new_player(self, r, g, b):
         p = Player(''.join(random.choices(string.ascii_uppercase + string.digits, k=5)) + str(len(self.players) + 1), r,
-                g, b, 200)
-        x = 500
+                   g, b, 50)
+        x = 100
         y = 100
         p.set_xy(x, y)
         p.client_interface.set_information(r, g, b, x, y, p.size)
