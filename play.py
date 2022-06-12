@@ -214,6 +214,8 @@ class PlayScreen(Screen):
 
         self.event_refresh = None
 
+        self.label_score = Label(pos=(0, 0), text=f"Score:50")
+
         global player
         player = self.new_player(random.random(), random.random(), random.random())
 
@@ -236,6 +238,10 @@ class PlayScreen(Screen):
         global isPlaying
 
         if player is not None:
+            self.remove_widget(self.label_score)
+            self.label_score = Label(pos=(0, 0), text=f"Score:{player.size}")
+            self.add_widget(self.label_score)
+            
             cek = player.check_existence()
             if cek['status'] == 'GAMEOVER':
                 isPlaying = False
