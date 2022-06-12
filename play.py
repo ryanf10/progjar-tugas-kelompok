@@ -209,10 +209,10 @@ class PlayScreen(Screen):
         self.players = []
         self.player_keys = []
         self.cli = ClientInterface()
-        self.spawn_food()
         self.get_other_player()
 
         self.event_refresh = None
+        self.event_spawn_food = None
 
         self.label_score = Label(pos=(0, 0), text=f"Score:50")
 
@@ -222,7 +222,7 @@ class PlayScreen(Screen):
         global isPlaying
         isPlaying = True
 
-    def spawn_food(self):
+    def spawn_food(self, callback):
         hasil = self.cli.send_command("spawn_food")
 
     def get_other_player(self):
@@ -320,6 +320,7 @@ class PlayScreen(Screen):
         self.add_widget(root)
 
         self.event_refresh = Clock.schedule_interval(partial(self.refresh, root), 1 / 60)
+        self.event_spawn_food = Clock.schedule_interval(self.spawn_food, 10)
 
 
 class MyApp(App):
